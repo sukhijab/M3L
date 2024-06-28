@@ -8,9 +8,9 @@ from stable_baselines3.common.vec_env import SubprocVecEnv, VecNormalize, DummyV
 from stable_baselines3.common.utils import set_random_seed
 
 import tactile_envs
-import envs
-from utils.callbacks import create_callbacks
-from models.pretrain_models import VTT, VTMAE, MAEPolicy
+import M3L.envs
+from M3L.utils.callbacks import create_callbacks
+from M3L.models.pretrain_models import VTT, VTMAE, MAEPolicy
 
 def str2bool(v):
     if v.lower() == "true":
