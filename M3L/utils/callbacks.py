@@ -5,7 +5,7 @@ from stable_baselines3.common.callbacks import CheckpointCallback, BaseCallback
 from stable_baselines3.common.utils import configure_logger
 from stable_baselines3.common.vec_env import DummyVecEnv
 
-import envs
+import M3L.envs as envs
 from M3L.utils.wandb_logger import WandbLogger
 from M3L.utils.pretrain_utils import log_videos
 
