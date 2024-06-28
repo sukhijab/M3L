@@ -6,6 +6,7 @@ import numpy as np
 import gymnasium as gym
 from gymnasium.spaces import Box
 
+
 class FrameStack(gym.ObservationWrapper):
     """Observation wrapper that stacks the observations in a rolling manner.
 
@@ -32,9 +33,9 @@ class FrameStack(gym.ObservationWrapper):
     """
 
     def __init__(
-        self,
-        env: gym.Env,
-        num_stack: int
+            self,
+            env: gym.Env,
+            num_stack: int
     ):
         """Observation wrapper that stacks the observations in a rolling manner.
 
@@ -45,9 +46,9 @@ class FrameStack(gym.ObservationWrapper):
         """
         super().__init__(env)
         self.num_stack = num_stack
-        
-        
-        self.frames = dict(zip(self.observation_space.spaces.keys(), [deque([], maxlen=num_stack) for _ in range(len(self.observation_space.spaces))]))
+
+        self.frames = dict(zip(self.observation_space.spaces.keys(),
+                               [deque([], maxlen=num_stack) for _ in range(len(self.observation_space.spaces))]))
 
         self.observation_space = gym.spaces.Dict()
         for key in self.env.observation_space.spaces.keys():
@@ -70,7 +71,8 @@ class FrameStack(gym.ObservationWrapper):
         """
         for key in self.frames.keys():
             assert len(self.frames[key]) == self.num_stack, (len(self.frames[key]), self.num_stack)
-        new_frames = dict(zip(self.observation_space.spaces.keys(), [np.stack(self.frames[key], axis=0) for key in self.frames.keys()]))
+        new_frames = dict(zip(self.observation_space.spaces.keys(),
+                              [np.stack(self.frames[key], axis=0) for key in self.frames.keys()]))
         return new_frames
 
     def step(self, action):
@@ -82,7 +84,7 @@ class FrameStack(gym.ObservationWrapper):
         Returns:
             Stacked observations, reward, terminated, truncated, and information from the environment
         """
-        
+
         observation, reward, terminated, truncated, info = self.env.step(action)
         for key in self.frames.keys():
             self.frames[key].append(observation[key])
@@ -98,15 +100,15 @@ class FrameStack(gym.ObservationWrapper):
             The stacked observations
         """
         obs, _ = self.env.reset(**kwargs)
-        
+
         for key in self.frames.keys():
             [self.frames[key].append(obs[key]) for _ in range(self.num_stack)]
 
         return self.observation(None), {}
-    
+
     def render(self, highres=False):
         if highres:
             img = self.env.env.env.env.observation(None)['image']
-            return img.astype(np.float32)/255
+            return img.astype(np.float32) / 255
         else:
             return self.env.render()

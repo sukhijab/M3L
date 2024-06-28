@@ -13,7 +13,7 @@ from stable_baselines3.common.policies import ActorCriticCnnPolicy, ActorCriticP
 from stable_baselines3.common.type_aliases import GymEnv, MaybeCallback, Schedule
 from stable_baselines3.common.utils import explained_variance, get_schedule_fn
 
-from utils.pretrain_utils import vt_load
+from M3L.utils.pretrain_utils import vt_load
 
 import copy
 

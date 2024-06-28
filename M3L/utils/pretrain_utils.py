@@ -4,8 +4,9 @@ from tqdm import tqdm
 import torch
 from stable_baselines3.common.logger import Video
 
+
 def vt_load(
-    x, image_normalization=[0, 1], tactile_normalization=[-1, 1], squeeze=False, frame_stack=1
+        x, image_normalization=[0, 1], tactile_normalization=[-1, 1], squeeze=False, frame_stack=1
 ):
     ### Load and normalize to [0,1] ###
 
@@ -16,40 +17,41 @@ def vt_load(
     if "image" in x:
         if len(x["image"].shape) == 3:
             x["image"] = x["image"][None, :, :, :]  # Add batch dimension
-    
+
     if "tactile" in x:
         if len(x["tactile"].shape) == 3:
             x["tactile"] = x["tactile"][None, :, :, :]  # Add batch dimension
 
     # Preprocess the image
     if "image" in x:
-        assert x["image"].shape[-1] == 3*frame_stack
+        assert x["image"].shape[-1] == 3 * frame_stack
         x["image"] = torch.Tensor(x["image"]).permute(0, 3, 1, 2)
         x["image"] = (x["image"] - image_normalization[0]) / (
-            image_normalization[1] - image_normalization[0]
+                image_normalization[1] - image_normalization[0]
         )
-    
+
     # Preprocess the tactile
     if "tactile" in x:
-        assert x["tactile"].shape[1] == 3*frame_stack or x["tactile"].shape[1] == 6*frame_stack or x["tactile"].shape[1] == 12*frame_stack
+        assert x["tactile"].shape[1] == 3 * frame_stack or x["tactile"].shape[1] == 6 * frame_stack or \
+               x["tactile"].shape[1] == 12 * frame_stack
 
         idx = []
         n_tactiles = x["tactile"].shape[1] // frame_stack
         for i in range(frame_stack):
-            idx.append(i*n_tactiles+0)
-            idx.append(i*n_tactiles+1)
-            idx.append(i*n_tactiles+2)
+            idx.append(i * n_tactiles + 0)
+            idx.append(i * n_tactiles + 1)
+            idx.append(i * n_tactiles + 2)
         idx = np.array(idx).flatten()
-        
-        n_sensors = n_tactiles//3
+
+        n_sensors = n_tactiles // 3
         for tactile_idx in range(n_sensors):
-            x["tactile"+str(tactile_idx+1)] = torch.Tensor(x["tactile"][:, idx+3*tactile_idx])
-            x["tactile"+str(tactile_idx+1)] = (x["tactile"+str(tactile_idx+1)] - tactile_normalization[0]) / (
-                tactile_normalization[1] - tactile_normalization[0]
+            x["tactile" + str(tactile_idx + 1)] = torch.Tensor(x["tactile"][:, idx + 3 * tactile_idx])
+            x["tactile" + str(tactile_idx + 1)] = (x["tactile" + str(tactile_idx + 1)] - tactile_normalization[0]) / (
+                    tactile_normalization[1] - tactile_normalization[0]
             )
 
         del x["tactile"]
-    
+
     if squeeze:
         for key in x:
             x[key] = x[key].squeeze()
@@ -106,8 +108,8 @@ def eval_loss(model, loader, normalize_image=False):
 
     return r_loss / len(loader.dataset)
 
-def annotate_frame(step, frame, rew, info={}):
 
+def annotate_frame(step, frame, rew, info={}):
     """Renders a video frame and adds caption."""
     if np.max(frame) <= 1.0:
         frame *= 255.0
@@ -145,28 +147,29 @@ def annotate_frame(step, frame, rew, info={}):
 
     return frame
 
+
 def log_videos(
-    obses,
-    rewards_per_step,
-    logger,
-    num_timesteps,
-    frame_stack=1
+        obses,
+        rewards_per_step,
+        logger,
+        num_timesteps,
+        frame_stack=1
 ):
-    
     image_video = []
     reward_video = []
-    
+
     episode_return = 0.0
     for (x, reward) in zip(obses, rewards_per_step):  # For each timestep
-        
+
         if 'image' in x:
             x['image'] = x['image'].transpose((0, 2, 3, 1, 4))
             x['image'] = x['image'].reshape((x['image'].shape[0], x['image'].shape[1], x['image'].shape[2], -1))
         if 'tactile' in x:
-            x['tactile'] = x['tactile'].reshape((x['tactile'].shape[0], -1, x['tactile'].shape[3], x['tactile'].shape[4]))
-        
+            x['tactile'] = x['tactile'].reshape(
+                (x['tactile'].shape[0], -1, x['tactile'].shape[3], x['tactile'].shape[4]))
+
         x = vt_load(x, frame_stack=frame_stack)
-        
+
         if torch.cuda.is_available():
             for key in ['image', 'tactile1', 'tactile2']:
                 if key in x:
@@ -175,7 +178,7 @@ def log_videos(
         # if frame_stack > 1: # image is (1, frame_stack*channels, height, width)
         image = x["image"].reshape((frame_stack, -1, x["image"].shape[2], x["image"].shape[3]))
         image = image[-1].detach().cpu()
-        
+
         image_video.append(image)
 
         episode_return += reward
@@ -195,4 +198,3 @@ def log_videos(
     logger.dump(step=num_timesteps)
 
     return True
-

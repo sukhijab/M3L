@@ -1,6 +1,6 @@
 from stable_baselines3.common.monitor import Monitor
 
-from utils.frame_stack import FrameStack
+from M3L.utils.frame_stack import FrameStack
 
 import gymnasium as gym
 from gymnasium.wrappers.pixel_observation import PixelObservationWrapper

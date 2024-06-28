@@ -6,8 +6,9 @@ from stable_baselines3.common.utils import configure_logger
 from stable_baselines3.common.vec_env import DummyVecEnv
 
 import envs
-from utils.wandb_logger import WandbLogger
-from utils.pretrain_utils import log_videos
+from M3L.utils.wandb_logger import WandbLogger
+from M3L.utils.pretrain_utils import log_videos
+
 
 class TensorboardCallback(BaseCallback):
     """
@@ -24,18 +25,18 @@ class TensorboardCallback(BaseCallback):
 
 class EvalCallback(BaseCallback):
     def __init__(
-        self,
-        env,
-        state_type,
-        no_tactile=False,
-        representation=True,
-        eval_every=1,
-        verbose=0,
-        config=None,
-        objects=["square"],
-        holders=["holder2"],
-        camera_idx=0,
-        frame_stack=1,
+            self,
+            env,
+            state_type,
+            no_tactile=False,
+            representation=True,
+            eval_every=1,
+            verbose=0,
+            config=None,
+            objects=["square"],
+            holders=["holder2"],
+            camera_idx=0,
+            frame_stack=1,
     ):
         super(EvalCallback, self).__init__(verbose)
         self.n_samples = 4
@@ -70,7 +71,6 @@ class EvalCallback(BaseCallback):
     def _on_rollout_start(self) -> None:
         self.count += 1
         if self.count >= self.eval_every:
-           
             ret, obses, rewards_per_step = self.eval_model()
             frame_stack = obses[0]["image"].shape[1]
             self.logger.record("eval/return", ret)
@@ -97,7 +97,7 @@ class EvalCallback(BaseCallback):
             reward += rewards[0]
             rewards_per_step.append(rewards[0])
             obses.append(obs)
-        
+
         return reward, obses, rewards_per_step
 
 
